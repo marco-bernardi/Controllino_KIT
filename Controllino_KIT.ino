@@ -2,7 +2,9 @@ int pinBtn = 5;
 int pinLedStart = 6;
 int pinLedEnd = 11;
 int buttonState;
-long countStart;
+long countStart = 0;
+bool attivo = true;
+bool ledStatus = true;
 
 void setup() {
   Serial.begin(9600);
@@ -10,47 +12,52 @@ void setup() {
   for (int i = pinLedStart; i <= pinLedEnd; i++){
     pinMode(i, OUTPUT);
   }
-
 }
 
 void loop() {
-  buttonState = digitalRead(pinBtn);
-  if (buttonState == HIGH) {
-    countStart = millis();
-    if ((millis - countStart) == (long)2000) {
-      Serial.println("Ciao");
+  buttonState = digitalRead(5);
+
+  if (buttonState == HIGH){
+    long startTime = millis();
+    while(attivo){
+      if (millis() - startTime >= 2000){
+        while(ledStatus){
+          Blinking2();
+          buttonState = digitalRead(5);
+          if (buttonState == HIGH){
+                ledStatus = false;
+                attivo = false;
+                Serial.println("Reset variabili");
+          }
+        }
+      }
     }
-    
-    Serial.println("Premendo");
-  } else {
-    Serial.println("CIAO FRA");
+    attivo = true;
+    ledStatus = true;
+    Serial.println("The End");
+    delay(1000);
   }
-  
+
 }
- 
-}
-void Blinking(){
-  for (int i = pinLedStart; i <= pinLedEnd; i++){
-    digitalWrite(i, HIGH);
-    if (i > pinLedStart){
-          delay(100);
-          digitalWrite(i-1, LOW);
+void Blinking2(){
+    for (int i = pinLedStart; i <= pinLedEnd + 1; i++){
+      digitalWrite(i, HIGH);
+      if (i != pinLedStart){
+        delay(500);
+        digitalWrite(i - 1, LOW);
+      } else {    
+      }
     }
-    if (i != pinLedEnd){
-      delay(500);
-    } else {
-      delay(500);
+
+    for (int i = pinLedEnd; i >= pinLedStart; i--){
+      if (i != pinLedStart){
+        digitalWrite(i - 1, HIGH);
+        delay(500);
+      } else {
+        delay(500);
+        digitalWrite(i, LOW);
+      }
+      digitalWrite(i, LOW);
     }
-  }
-  for (int i = pinLedEnd - 1; i >= pinLedStart; i--){
-    digitalWrite(i, HIGH);
-    delay(100);
-    digitalWrite(i+1, LOW);
-    
-    if (i != pinLedStart){
-     delay(500);
-    }
-  } 
-  
 
 }
